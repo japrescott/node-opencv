@@ -7,11 +7,17 @@ public:
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Local<Object> target);
   static NAN_METHOD(New);
+  static Local<Object> CreateWrappedFromMat(cv::Mat mat);
+  static Local<Object> CreateWrappedFromMatIfNotReferenced(cv::Mat mat, int baseRefCount);
+  int getWrappedRefCount();
+  void setMat(cv::Mat mat);
   Matrix();
+  Matrix(Matrix *other);
   Matrix(cv::Mat other, cv::Rect roi);
   Matrix(int rows, int cols);
   Matrix(int rows, int cols, int type);
   Matrix(int rows, int cols, int type, Local<Object> scalarObj);
+  ~Matrix();
 
   static double DblGet(cv::Mat mat, int i, int j);
 
@@ -20,6 +26,7 @@ public:
   JSFUNC(Eye)  // factory
 
   JSFUNC(Get)  // at
+  JSFUNC(GetPixel)
   JSFUNC(Set)
   JSFUNC(Put)
 
@@ -89,7 +96,9 @@ public:
 
   // Feature Detection
   JSFUNC(GoodFeaturesToTrack)
+  #ifdef HAVE_OPENCV_VIDEO
   JSFUNC(CalcOpticalFlowPyrLK)
+  #endif
   JSFUNC(HoughLinesP)
   JSFUNC(HoughCircles)
 
@@ -131,9 +140,18 @@ public:
   JSFUNC(Shift)
   JSFUNC(Reshape)
 
+          
+// leave this out - can't see a way it could be useful to us, as release() always completely forgets the data
+//JSFUNC(Addref)
   JSFUNC(Release)
+  JSFUNC(GetrefCount)
 
   JSFUNC(Subtract)
+  JSFUNC(Compare)
+  JSFUNC(Mul)
+  JSFUNC(Div)
+  JSFUNC(Pow)
+
   /*
    static Handle<Value> Val(const Arguments& info);
    static Handle<Value> RowRange(const Arguments& info);
